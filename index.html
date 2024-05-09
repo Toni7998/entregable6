@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages p {
+            background-color: #eee;
+            padding: 10px;
+            margin: 1px 0;
+        }
+
+        #messageForm {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        #messageForm input {
+            width: 80%;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #messageForm button {
+            width: 15%;
+            padding: 10px;
+            border: none;
+            background-color: #007BFF;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #messageForm button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="messages"></div>
+    <form id="messageForm">
+        <input type="text" id="message" placeholder="Escribe un mensaje" required>
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script>
+        window.onload = function () {
+            var ws = new WebSocket('ws://localhost:8080');
+
+            ws.onopen = function () {
+                console.log('Conectado al servidor de chat');
+            };
+
+            ws.onmessage = function (event) {
+                var message = JSON.parse(event.data);
+                var messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML += '<p><strong>' + message.from + ':</strong> ' + message.message + '</p>';
+            };
+
+            var form = document.getElementById('messageForm');
+            form.onsubmit = function (event) {
+                event.preventDefault();
+                var messageInput = document.getElementById('message');
+                var message = { type: 'message', message: messageInput.value };
+                ws.send(JSON.stringify(message));
+                messageInput.value = '';
+            };
+        };
+    </script>
+</body>
+
+</html>
